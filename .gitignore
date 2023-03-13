@@ -127,3 +127,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# API Key Files
+google_map_api_key.txt
+*_api_key.txt
+api_keys.json
