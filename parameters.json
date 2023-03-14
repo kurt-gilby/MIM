@@ -1,0 +1,14 @@
+{
+    "GM_API_KEY_TXT_FILE": "google_map_api_key.txt",
+    "API_KEYS_JSON": "api_keys.json",
+    "API_KEYS_JSON_GM_KEY":"googlemaps",
+    "GM_API_VALUE": "MY_GM_API_VALUE",
+    "APP_TITLE":"Meet in the Midde",  
+    "APP_WIDTH":"800",
+    "APP_HEIGHT": "800",
+    "ITEM_WIDTH": "400", 
+    "SEACH_ENTRY_LABEL": "Search For Location...",
+    "SUGGESTION_BOX_LABEL": "Pick any one...",
+    "SELECTION_BOX_LABEL": "Selected Locations..."
+    
+}
