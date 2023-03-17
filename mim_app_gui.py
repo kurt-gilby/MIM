@@ -25,28 +25,39 @@ class MIMAppGUI:
         self.root = tk.Tk()
         self.anchor = tk.W
         self.widgets = []
-        self.suggestions = []
-    
+        self.on_search_suggestions_dict = {}
+        self.on_selection_places_dict = {}
+        self.places_lat_long_dict ={}
+
     def set_app_title(self):
         self.root.title(self.title)
 
     def set_app_size(self):
         self.root.geometry(f'{self.width}x{self.height}')
     
+    def connect_to_googlemaps(self):
+        try:
+            gmav = GoogleMapsApiValue()
+            gm_api_key = gmav.get_gm_api_key()
+            gmacs = GoogleMapsAPICalls(gm_api_key)
+            gm_client = gmacs.connect_to_googlemaps()
+        except ApiError as e:
+            print(f'Google API Connection Error!: {e}')
+        return gmacs,gm_client
+    
     def on_search_input_update(self, event):
         entry = event.widget.get()
         if len(entry) > 9:
             try:
-                gmav = GoogleMapsApiValue()
-                gm_api_key = gmav.get_gm_api_key()
-                gmacs = GoogleMapsAPICalls(gm_api_key)
-                gm_client = gmacs.connect_to_googlemaps()
-                suggestions = gmacs.get_suggested_places_for_query(gm_client,entry)
+                gmacs, gm_client = self.connect_to_googlemaps()
+                suggestions_dict = gmacs.get_suggested_places_for_query(gm_client,entry)
             except ApiError as e:
                 print(f'Error with googlemaps API call!: {e}')
             self.widgets[1].delete(0,tk.END)
-            for suggestion in suggestions:
-                self.widgets[1].insert(tk.END,suggestion)
+            for suggestion in suggestions_dict:
+                if suggestion not in self.on_search_suggestions_dict:
+                    self.on_search_suggestions_dict[suggestion] = suggestions_dict[suggestion]
+                self.widgets[1].insert(tk.END,suggestions_dict[suggestion])
                 
 
     def add_search_input(self):
@@ -63,9 +74,12 @@ class MIMAppGUI:
         selections = suggestion_box.curselection()
         for selection_index in reversed(selections):
             selection_value = suggestion_box.get(selection_index)
+            for key, value in self.on_search_suggestions_dict.items():
+                if value == selection_value:
+                    self.on_selection_places_dict[key] = selection_value
+                    break
             suggestion_box.delete(selection_index)
             selection_box.insert(0, selection_value)
-            
 
     def add_suggestions_list(self):
         suggestion_box_label = tk.Label(self.root,text=self.suggestion_box_label)
@@ -82,9 +96,17 @@ class MIMAppGUI:
         selections_box_input.pack(anchor=self.anchor)
         self.widgets.append(selections_box_input)
 
-    def calculate_middle_and_display(self,event):
-        pass
     
+    def calculate_middle_and_display(self):
+        selected_palces_ids = list(self.on_selection_places_dict.keys())
+        try:
+                gmacs, gm_client = self.connect_to_googlemaps()
+                self.places_lat_long_dict = gmacs.get_places_lat_lng(gm_client,selected_palces_ids)
+        except ApiError as e:
+                print(f'Error with googlemaps API call!: {e}')
+        
+
+
     def add_calculate_middle_and_display_buttion(self):
         cmd_button = tk.Button(self.root, text=self.cmd_button_text, width=self.item_width, command=self.calculate_middle_and_display)
         cmd_button.pack(anchor=self.anchor)
