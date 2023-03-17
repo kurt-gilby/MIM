@@ -53,12 +53,23 @@ class MIMAppGUI:
         self.widgets.append(search_input)
         search_input.bind("<KeyRelease>", self.on_search_input_update)
     
+    def move_suggestion_to_selection(self,event):
+        suggestion_box = event.widget
+        selection_box = self.widgets[2]
+        selections = suggestion_box.curselection()
+        for selection_index in reversed(selections):
+            selection_value = suggestion_box.get(selection_index)
+            suggestion_box.delete(selection_index)
+            selection_box.insert(0, selection_value)
+            
+
     def add_suggestions_list(self):
         suggestion_box_label = tk.Label(self.root,text=self.suggestion_box_label)
         suggestion_box_label.pack(anchor=self.anchor)
-        suggestion_box_input= tk.Listbox(self.root, width=self.item_width)
+        suggestion_box_input= tk.Listbox(self.root, width=self.item_width, selectmode="browse")
         suggestion_box_input.pack(anchor=self.anchor)
         self.widgets.append(suggestion_box_input)
+        suggestion_box_input.bind("<Button-1>", self.move_suggestion_to_selection)
     
     def add_selections_list(self):
         selections_box_label = tk.Label(self.root,text=self.selection_box_label)
