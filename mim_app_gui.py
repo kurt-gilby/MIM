@@ -15,9 +15,13 @@ class MIMAppGUI:
         self.width = file_data["APP_WIDTH"]
         self.item_width = file_data["ITEM_WIDTH"]
         self.height = file_data["APP_HEIGHT"]
+        self.selection_box_height = file_data["SELECTION_BOX_HEIGTH"]
         self.search_entry_label = file_data["SEACH_ENTRY_LABEL"]
         self.suggestion_box_label = file_data["SUGGESTION_BOX_LABEL"]
         self.selection_box_label = file_data["SELECTION_BOX_LABEL"]
+        self.cmd_button_text = file_data["CALCULATE_AND_DISPLAY_TEXT"]
+        self.canvas_width = file_data["CANVAS_WIDTH"]
+        self.canvas_heigth = file_data["CANVAS_HEIGTH"]
         self.root = tk.Tk()
         self.anchor = tk.W
         self.widgets = []
@@ -66,7 +70,7 @@ class MIMAppGUI:
     def add_suggestions_list(self):
         suggestion_box_label = tk.Label(self.root,text=self.suggestion_box_label)
         suggestion_box_label.pack(anchor=self.anchor)
-        suggestion_box_input= tk.Listbox(self.root, width=self.item_width, selectmode="browse")
+        suggestion_box_input= tk.Listbox(self.root, width=self.item_width, selectmode="browse",height=self.selection_box_height)
         suggestion_box_input.pack(anchor=self.anchor)
         self.widgets.append(suggestion_box_input)
         suggestion_box_input.bind("<Button-1>", self.move_suggestion_to_selection)
@@ -74,9 +78,22 @@ class MIMAppGUI:
     def add_selections_list(self):
         selections_box_label = tk.Label(self.root,text=self.selection_box_label)
         selections_box_label.pack(anchor=self.anchor)
-        selections_box_input= tk.Listbox(self.root, width=self.item_width)
+        selections_box_input= tk.Listbox(self.root, width=self.item_width,height=self.selection_box_height)
         selections_box_input.pack(anchor=self.anchor)
-        self.widgets.append(selections_box_input)  
+        self.widgets.append(selections_box_input)
+
+    def calculate_middle_and_display(self,event):
+        pass
+    
+    def add_calculate_middle_and_display_buttion(self):
+        cmd_button = tk.Button(self.root, text=self.cmd_button_text, width=self.item_width, command=self.calculate_middle_and_display)
+        cmd_button.pack(anchor=self.anchor)
+        self.widgets.append(cmd_button)
+    
+    def add_canvas_for_gmap_display(self):
+        gmap_display_canvas = tk.Canvas(self.root, width=self.canvas_width,height=self.canvas_heigth, bd=2,bg='white',highlightthickness=1,highlightbackground='white')
+        gmap_display_canvas.pack(pady=10)
+
 
 
 
@@ -86,6 +103,8 @@ class MIMAppGUI:
         self.add_search_input()
         self.add_suggestions_list()
         self.add_selections_list()
+        self.add_calculate_middle_and_display_buttion()
+        self.add_canvas_for_gmap_display()
         self.root.mainloop()
         
 

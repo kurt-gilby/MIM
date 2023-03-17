@@ -6,9 +6,13 @@
     "APP_TITLE":"Meet in the Midde",  
     "APP_WIDTH":"800",
     "APP_HEIGHT": "800",
-    "ITEM_WIDTH": "400", 
+    "ITEM_WIDTH": "400",
+    "CANVAS_WIDTH": "800",
+    "CANVAS_HEIGTH": "300",
+    "SELECTION_BOX_HEIGTH": "5",
     "SEACH_ENTRY_LABEL": "Search For Location...",
     "SUGGESTION_BOX_LABEL": "Pick any one...",
-    "SELECTION_BOX_LABEL": "Selected Locations..."
+    "SELECTION_BOX_LABEL": "Selected Locations...",
+    "CALCULATE_AND_DISPLAY_TEXT": "Calculate Middle"
     
 }
