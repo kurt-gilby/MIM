@@ -14,11 +14,16 @@ class GoogleMapsAPICalls:
             print(f'Google API Connection Error!: {e}')
         return gmaps
     
-    def get_suggested_places_for_query(self, gm_client, query):
+    def get_suggested_places_for_query(self, gm_client, query,current_location_dict):
+        country = {'country' : current_location_dict['country_short']}    
+        state = current_location_dict['state']
+        city = current_location_dict['city']
+        query = state + ' ' + city + ' ' + query
         try:
-            results = gm_client.places_autocomplete(query)
+            results = gm_client.places_autocomplete(query, components = country)
             suggestions = [result['description'] for result in results]
             suggestion_ids = [result['place_id'] for result in results]
+
         except ApiError as e:
             print(f'Error getting result from places query! {e}')
         suggestions_dict= dict(zip(suggestion_ids,suggestions))
@@ -38,7 +43,7 @@ class GoogleMapsAPICalls:
                 print(f'Error retriving lat and lng! {e}')
         return places_lat_lng_dict
     
-    # TODO: Complete this get current locaion details
+    
     def get_current_location_details(self,gm_client):
         current_location_lat_lng_tup = tuple(geocoder.ip('me').latlng)
         locations_results = gm_client.reverse_geocode(current_location_lat_lng_tup)
@@ -46,10 +51,12 @@ class GoogleMapsAPICalls:
         address_key = 'address_components'
         address_type_key = 'types'
         address_name_key = 'long_name'
+        address_short_name_key = 'short_name'
         address_types = ['locality','administrative_area_level_1','country']
         country_list = []
         state_list =[]
         city_list =[]
+        current_location_details_dict = {}
         for location_result in locations_results:
             for address_item in location_result[address_key]:
                 for address_type in address_item[address_type_key]:
@@ -57,6 +64,7 @@ class GoogleMapsAPICalls:
                         if address_type == address_types[2]:
                             if address_item[address_name_key] not in country_list:
                                 country_list.append(address_item[address_name_key])
+                                country_list.append(address_item[address_short_name_key])
                         elif address_type == address_types[1]:
                             if address_item[address_name_key] not in state_list:
                                 state_list.append(address_item[address_name_key])
@@ -64,11 +72,9 @@ class GoogleMapsAPICalls:
                             if address_item[address_name_key] not in city_list:
                                 city_list.append(address_item[address_name_key])
             locations_results_index += 1
-        print(country_list)
-        print(state_list)
-        print(city_list)
-            
-            
-            
-            
+        current_location_details_dict['country'] = country_list[0]
+        current_location_details_dict['country_short'] = country_list[1]
+        current_location_details_dict['state'] = state_list[0]
+        current_location_details_dict['city'] = city_list[0]
+        return current_location_details_dict
 

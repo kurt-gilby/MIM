@@ -28,13 +28,11 @@ class MIMAppGUI:
         self.on_search_suggestions_dict = {}
         self.on_selection_places_dict = {}
         self.places_lat_long_dict ={}
+        self.current_location_details_dict = {}
+        self.gmacs = None
+        self.gm_client = None
 
-    def set_app_title(self):
-        self.root.title(self.title)
 
-    def set_app_size(self):
-        self.root.geometry(f'{self.width}x{self.height}')
-    
     def connect_to_googlemaps(self):
         try:
             gmav = GoogleMapsApiValue()
@@ -43,22 +41,20 @@ class MIMAppGUI:
             gm_client = gmacs.connect_to_googlemaps()
         except ApiError as e:
             print(f'Google API Connection Error!: {e}')
-        return gmacs,gm_client
+        self.gmacs = gmacs
+        self.gm_client = gm_client
     
-    def on_search_input_update(self, event):
-        entry = event.widget.get()
-        if len(entry) > 9:
-            try:
-                gmacs, gm_client = self.connect_to_googlemaps()
-                suggestions_dict = gmacs.get_suggested_places_for_query(gm_client,entry)
-            except ApiError as e:
-                print(f'Error with googlemaps API call!: {e}')
-            self.widgets[1].delete(0,tk.END)
-            for suggestion in suggestions_dict:
-                if suggestion not in self.on_search_suggestions_dict:
-                    self.on_search_suggestions_dict[suggestion] = suggestions_dict[suggestion]
-                self.widgets[1].insert(tk.END,suggestions_dict[suggestion])
-                
+    def get_current_locations_details(self):
+        try:
+            self.current_location_details_dict = self.gmacs.get_current_location_details(self.gm_client)
+        except ApiError as e:
+            print(f'Error with googlemaps API call!: {e}')
+    
+    def set_app_title(self):
+        self.root.title(self.title)
+
+    def set_app_size(self):
+        self.root.geometry(f'{self.width}x{self.height}')
 
     def add_search_input(self):
         search_label = tk.Label(self.root,text=self.search_entry_label)
@@ -67,6 +63,19 @@ class MIMAppGUI:
         search_input.pack(anchor=self.anchor)
         self.widgets.append(search_input)
         search_input.bind("<KeyRelease>", self.on_search_input_update)
+            
+    def on_search_input_update(self, event):
+        entry = event.widget.get()
+        if len(entry) > 9:
+            try:
+                suggestions_dict = self.gmacs.get_suggested_places_for_query(self.gm_client,entry,self.current_location_details_dict)
+            except ApiError as e:
+                print(f'Error with googlemaps API call!: {e}')
+            self.widgets[1].delete(0,tk.END)
+            for suggestion in suggestions_dict:
+                if suggestion not in self.on_search_suggestions_dict:
+                    self.on_search_suggestions_dict[suggestion] = suggestions_dict[suggestion]
+                self.widgets[1].insert(tk.END,suggestions_dict[suggestion])
     
     def move_suggestion_to_selection(self,event):
         suggestion_box = event.widget
@@ -120,6 +129,8 @@ class MIMAppGUI:
 
 
     def load_mim_app_gui(self):
+        self.connect_to_googlemaps()
+        self.get_current_locations_details()
         self.set_app_title()
         self.set_app_size()
         self.add_search_input()
