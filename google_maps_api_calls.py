@@ -31,14 +31,15 @@ class GoogleMapsAPICalls:
     
     def get_places_lat_lng(self, gm_client, selected_palces_ids):
         places_lat_lng_dict ={}
-        lat_lng_dict = {}
         for selected_place_id in selected_palces_ids:
             try:
                 place_details = gm_client.place(place_id=selected_place_id)
                 place_id = place_details['result']['place_id']
-                lat_lng_dict['lat'] = place_details['result']['geometry']['location']['lat']
-                lat_lng_dict['lng'] = place_details['result']['geometry']['location']['lng']
-                places_lat_lng_dict[place_id] = lat_lng_dict
+                lat = place_details['result']['geometry']['location']['lat']
+                lng = place_details['result']['geometry']['location']['lng']
+                places_lat_lng_dict[place_id] = {}
+                places_lat_lng_dict[place_id]['lat']= lat
+                places_lat_lng_dict[place_id]['lng']= lng
             except ApiError as e:
                 print(f'Error retriving lat and lng! {e}')
         return places_lat_lng_dict
