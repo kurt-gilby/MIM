@@ -3,6 +3,8 @@ import tkinter as tk
 from google_maps_api_value import GoogleMapsApiValue
 from google_maps_api_calls import GoogleMapsAPICalls
 from googlemaps.exceptions import ApiError
+from PIL import ImageTk, Image
+from io import BytesIO
 class MIMAppGUI:
 
     def __init__(self) -> None:
@@ -31,6 +33,8 @@ class MIMAppGUI:
         self.current_location_details_dict = {}
         self.gmacs = None
         self.gm_client = None
+        self.places_lat_lst = []
+        self.places_lng_lst = []
 
 
     def connect_to_googlemaps(self):
@@ -105,15 +109,54 @@ class MIMAppGUI:
         selections_box_input.pack(anchor=self.anchor)
         self.widgets.append(selections_box_input)
 
+    def set_places_lat_lng_list(self, param_dict):
+        for place_id, lat_lng_dict in param_dict.items():
+            for lat_lng, value in lat_lng_dict.items():
+                if 'lat' in lat_lng:
+                    self.places_lat_lst.append(value)
+                elif 'lng' in lat_lng:
+                    self.places_lng_lst.append(value)
     
+    def get_places_mid_lat_lng(self):
+        total_lat = sum(self.places_lat_lst)
+        count_lat = len(self.places_lat_lst)
+        total_lng = sum(self.places_lng_lst)
+        count_lng = len(self.places_lng_lst)
+        average_lat = total_lat/count_lat
+        average_lng = total_lng/count_lng
+        self.places_lat_lst.append(average_lat)
+        self.places_lng_lst.append(average_lng)
+    
+    #TODO Get the static map to work
+    def display_map_with_markers(self):
+        marker_coordinates = list(zip(self.places_lat_lst,self.places_lng_lst))
+        mid_point_coordinates = marker_coordinates[-1]
+        mid_point_pair = f'{mid_point_coordinates[0]},{mid_point_coordinates[-1]}'
+        try:
+            static_map_img = self.gm_client.static_map(size = [100,100], zoom = 10, center = mid_point_pair)
+        except Exception as e:
+            print(f'Error occured while generating the static map : {e}')
+        
+
+
+
+
+    
+    def find_midpoint(self, places_lat_long_dict):
+        self.set_places_lat_lng_list(places_lat_long_dict)
+        self.get_places_mid_lat_lng()
+        self.display_map_with_markers()
+
+        
+        
+
     def calculate_middle_and_display(self):
         selected_palces_ids = list(self.on_selection_places_dict.keys())
         try:
-                gmacs, gm_client = self.connect_to_googlemaps()
-                self.places_lat_long_dict = gmacs.get_places_lat_lng(gm_client,selected_palces_ids)
+            self.places_lat_long_dict = self.gmacs.get_places_lat_lng(self.gm_client,selected_palces_ids)
         except ApiError as e:
                 print(f'Error with googlemaps API call!: {e}')
-        
+        self.find_midpoint(self.places_lat_long_dict)
 
 
     def add_calculate_middle_and_display_buttion(self):
@@ -124,6 +167,8 @@ class MIMAppGUI:
     def add_canvas_for_gmap_display(self):
         gmap_display_canvas = tk.Canvas(self.root, width=self.canvas_width,height=self.canvas_heigth, bd=2,bg='white',highlightthickness=1,highlightbackground='white')
         gmap_display_canvas.pack(pady=10)
+        self.widgets.append(gmap_display_canvas)
+
 
 
 
